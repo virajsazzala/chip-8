@@ -2,6 +2,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
+#include <stdbool.h>
 #include <sys/stat.h>
 #include <unistd.h>
 
@@ -61,10 +62,22 @@ void init(const char *fpath) {
 	fclose(fp);
 }
 
+uint16_t fetch() {
+	uint16_t ins = (memory[pc] << 8) | memory[pc + 1];
+	pc += 2;
+	return ins;
+}
+
 int main(int argc, char **argv) {
 	assert(argc == 2);
 	init(argv[1]);
-
+	
+	bool running = true;
+	while (running) {
+		uint16_t opcode = fetch();
+		printf("%04X\n", opcode);
+	}
+	
 	printf("hello, world!\n");
 	return 0;
 }
