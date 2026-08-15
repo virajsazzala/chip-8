@@ -1,6 +1,6 @@
-chip-8 emulator
-===============
+chip-8 interpreter
+==================
 
-A CHIP-8 (https://en.wikipedia.org/wiki/CHIP-8) emulator.
+A CHIP-8 (https://en.wikipedia.org/wiki/CHIP-8) interpreter.
 
 RESOURCES	has all the resources I referred to
