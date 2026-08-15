@@ -1,0 +1,22 @@
+spec
+cowgod: http://devernay.free.fr/hacks/chip8/C8TECH10.HTM
+
+test ROMs
+corax89: https://github.com/corax89/chip8-test-rom
+timendus: https://github.com/Timendus/chip8-test-suite
+
+game ROMs
+https://www.zophar.net/pdroms/chip8.html
+https://github.com/kripod/chip8-roms
+
+docs SDL2
+basics: https://lazyfoo.net/tutorials/SDL/index.php
+framebuf: https://wiki.libsdl.org/SDL2/SDL_RenderCopy
+input: https://wiki.libsdl.org/SDL2/SDL_PollEvent
+
+guides
+tobias: https://tobiasvl.github.io/blog/write-a-chip-8-emulator/
+austin: https://austinmorlan.com/posts/chip8_emulator/
+
+
+
