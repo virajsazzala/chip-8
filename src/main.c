@@ -170,6 +170,88 @@ void decode_execute(uint16_t ins) {
 		break;
 
 	case 0x8:
+		switch (n) {
+		// 8XY0: Set VX = VY
+		case 0:
+			registers[x] = registers[y];
+			break;
+
+		// 8XY1: Set VX = VX | VY
+		case 1:
+			registers[x] |= registers[y];
+			break;
+
+		// 8XY2: Set VX = VX & VY
+		case 2:
+			registers[x] &= registers[y];
+			break;
+
+		// 8XY3: Set VX = VX ^ VY
+		case 3:
+			registers[x] ^= registers[y];
+			break;
+
+		// 8XY4: Set VX = VX + VY, VF = carry
+		case 4: {
+			uint16_t sum = registers[x] + registers[y];
+			registers[x] = sum & 0xFF;
+
+			if (sum > 0xFF) {
+				registers[0xF] = 1;
+			} else {
+				registers[0xF] = 0;
+			}
+
+			break;
+		}
+
+		// 8XY5: Set VX = VX - VY, VF = not borrow
+		case 5: {
+			uint8_t vx = registers[x];
+			registers[x] = vx - registers[y];
+			registers[0xF] = (vx > registers[y]) ? 1 : 0;
+			break;
+		}
+
+		// 8XY6: Set VX = VX SHR 1
+		case 6: {
+			uint8_t lsb = registers[x] & 1;
+
+			if (lsb == 1) {
+				registers[0xF] = 1;
+			} else {
+				registers[0xF] = 0;
+			}
+
+			registers[x] /= 2;
+
+			break;
+		}
+
+		// 8XY7: Set VX = VY - VX, VF = not borrow
+		case 7: {
+			uint8_t vx = registers[x];
+			registers[x] = registers[y] - vx;
+			registers[0xF] = (registers[y] > vx) ? 1 : 0;
+			break;
+		}
+
+		// 8XYE: Set VX = VX SHL 1
+		case 0xE: {
+			uint8_t msb = (registers[x] >> 7) & 1;
+
+			if (msb == 1) {
+				registers[0xF] = 1;
+			} else {
+				registers[0xF] = 0;
+			}
+
+			registers[x] *= 2;
+
+			break;
+		}
+		}
+
 		break;
 
 	case 0x9:
