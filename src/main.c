@@ -1,28 +1,12 @@
 #include <assert.h>
 #include <stdbool.h>
-#include <stdint.h>
 #include <stdio.h>
 #include <string.h>
 #include <sys/stat.h>
 #include <unistd.h>
 
-#define PC_INIT 0x200
-#define DIS_H 32
-#define DIS_W 64
-#define REG_COUNT 16
-#define STK_CAPACITY 16
-#define MEM_CAPACITY 4096
-
-uint8_t dt;			   // delay timer
-uint8_t st;			   // sound timer
-uint8_t sp;			   // stack pointer
-uint16_t i;			   // a location in mem
-uint16_t pc = PC_INIT; // program counter
-
-uint8_t memory[MEM_CAPACITY];
-uint8_t display[DIS_H * DIS_W];
-uint8_t registers[REG_COUNT];
-uint16_t stack[STK_CAPACITY];
+#include "display.h"
+#include "globals.h"
 
 uint8_t fonts[] = {
 	0xF0, 0x90, 0x90, 0x90, 0xF0, // 0
@@ -44,6 +28,19 @@ uint8_t fonts[] = {
 };
 
 void init(const char *fpath) {
+	/* reset state */
+	dt = 0;
+	st = 0;
+	sp = 0;
+	i = 0;
+	memset(memory, 0, sizeof(memory));
+	memset(display, 0, sizeof(display));
+	memset(registers, 0, sizeof(registers));
+	memset(stack, 0, sizeof(stack));
+
+	/* set program counter to 0x200 */
+	pc = PC_INIT;
+
 	/* copy fonts to memory */
 	size_t font_size = sizeof(fonts);
 	memcpy(memory, fonts, font_size);
@@ -176,21 +173,27 @@ int main(int argc, char **argv) {
 	assert(argc == 2);
 	init(argv[1]);
 
-	bool running = true;
-	while (running) {
-		if (pc >= MEM_CAPACITY) {
-			// temporary to avoid inf loop
-			running = false;
-			break;
-		}
+	Screen screen;
 
-		uint16_t opcode = fetch();
-		printf("%04X\n", opcode);
-
-		decode_execute(opcode);
-		print_display();
+	if (init_screen(&screen) != 0) {
+		return 0;
 	}
 
-	printf("hello, world!\n");
+	SDL_Event e;
+	bool running = true;
+	while (running) {
+		while (SDL_PollEvent(&e)) {
+			if (e.type == SDL_QUIT) {
+				running = false;
+			}
+		}
+		uint16_t opcode = fetch();
+		decode_execute(opcode);
+		render(screen.renderer);
+		SDL_Delay(16);
+	}
+
+	kill_screen(&screen);
+
 	return 0;
 }
