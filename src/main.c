@@ -1,9 +1,12 @@
 #include <assert.h>
 #include <stdbool.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <stdint.h>
 #include <string.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <time.h>
 
 #include "display.h"
 #include "globals.h"
@@ -26,6 +29,7 @@ uint8_t fonts[] = {
 	0xF0, 0x80, 0xF0, 0x80, 0xF0, // E
 	0xF0, 0x80, 0xF0, 0x80, 0x80, // F
 };
+
 
 void init(const char *fpath) {
 	/* reset state */
@@ -106,26 +110,53 @@ void decode_execute(uint16_t ins) {
 
 	switch (op) {
 	case 0x0:
-		if (ins == 0x00E0) {
+		switch (ins) {
+		// 00E0: Clear the display
+		case 0x00E0:
 			clear_screen();
+			break;
+
+		// 00EE: Return from subroutine
+		case 0x00EE:
+			pc = stack[--sp];
+			break;
+	
+		// 0NNN: Jump to machine code routine at NNN
+		// Not implemented for now, due to rare use.
 		}
+
 		break;
 
 	case 0x1:
-		// 1NNN - Jump to location nnn
+		// 1NNN: Jump to location NNN
 		pc = nnn;
 		break;
 
 	case 0x2:
+		// 2NNN: Call subroutine at NNN
+		stack[sp++] = pc;
+		pc = nnn;
 		break;
 
 	case 0x3:
+		// 3XNN: Skip next instruction if VX = NN
+		if (registers[x] == nn) {
+			pc += 2;
+		}
 		break;
 
 	case 0x4:
+		// 4XNN: Skip next instruction if VX != NN
+		if (registers[x] != nn) {
+			pc += 2;
+		}
 		break;
 
 	case 0x5:
+		// 5XY0: Skip next instruction if VX = VY
+		if (registers[x] == registers[y]) {
+			pc += 2;
+		}	
 		break;
 
 	case 0x6:
@@ -142,6 +173,10 @@ void decode_execute(uint16_t ins) {
 		break;
 
 	case 0x9:
+		// 9XY0: Skip next instruction if VX != VY
+		if (registers[x] != registers[y]) {
+			pc += 2;
+		}	
 		break;
 
 	case 0xA:
@@ -150,10 +185,16 @@ void decode_execute(uint16_t ins) {
 		break;
 
 	case 0xB:
+		// BNNN: Jump to location NNN + V0
+		pc = nnn + registers[0];
 		break;
 
-	case 0xC:
+	case 0xC: {
+		// CXNN: Set VX = random byte AND NN
+		uint8_t rnum =  rand() % 256; // 0-255
+		registers[x] = rnum & nn;
 		break;
+	}
 
 	case 0xD:
 		// DXYN: Display n-byte sprite starting at memory I
@@ -171,6 +212,8 @@ void decode_execute(uint16_t ins) {
 
 int main(int argc, char **argv) {
 	assert(argc == 2);
+
+	srand(time(NULL));
 	init(argv[1]);
 
 	Screen screen;
