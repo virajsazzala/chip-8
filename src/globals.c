@@ -9,3 +9,7 @@ uint8_t memory[MEM_CAPACITY];
 uint8_t display[DIS_H * DIS_W];
 uint8_t registers[REG_COUNT];
 uint16_t stack[STK_CAPACITY];
+bool draw_flag = false;
+bool waiting_for_key = false;
+uint8_t key_being_waited = 0;
+

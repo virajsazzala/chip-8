@@ -2,6 +2,7 @@
 #define GLOBALS_H
 
 #include <stdint.h>
+#include <stdbool.h>
 
 #define SCALE 10
 
@@ -11,6 +12,11 @@
 #define REG_COUNT 16
 #define STK_CAPACITY 16
 #define MEM_CAPACITY 4096
+
+extern bool draw_flag;
+
+extern bool waiting_for_key;
+extern uint8_t key_being_waited;
 
 extern uint8_t dt;	// delay timer
 extern uint8_t st;	// sound timer
